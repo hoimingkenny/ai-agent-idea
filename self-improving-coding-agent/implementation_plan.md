@@ -9,8 +9,9 @@
 ### 2.1 Stack Selection
 *   **Language**: Python 3.10+ (Strong typing, rich ecosystem for AI/Agents).
 *   **Agent Framework**: **LangGraph** (Stateful, cyclic graph architecture perfect for the Plan-Execute-Reflect loop).
-*   **LLM Interface**: **LangChain** (Standard interface for LLMs, tools, and chains).
-*   **Sandboxing**: **Docker** (via `docker-py`). Provides complete isolation for executing untrusted code with resource limits (CPU/Memory).
+*   **LLM Interface**: **LangChain** (Standard interface for LLMs, tools, and chains). **OpenRouter** added for access to cost-effective models like `xiaomi/mimo-v2-flash:free`.
+*   **Sandboxing**: **Docker** (via `docker-py`). Provides complete isolation for executing untrusted code with resource limits. Includes a **Local Fallback** using `subprocess` for environments without Docker.
+*   **Deployment**: **Docker Compose** with Docker-in-Docker (DinD) support via socket mounting, ensuring the agent works identically in development and production.
 *   **Memory/Vector Store**: **ChromaDB**. Local, efficient vector store for semantic retrieval of past failures and solutions.
 *   **Static Analysis**: **AST** (Abstract Syntax Tree) & **Bandit**. Pre-execution safety checks to block dangerous operations.
 *   **CLI**: **Typer**. For a clean, robust command-line interface.

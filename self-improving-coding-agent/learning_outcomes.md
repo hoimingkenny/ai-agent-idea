@@ -32,3 +32,9 @@ Architected an autonomous agent capable of iteratively writing, executing, and r
 
 *   **Vector Database & Contextual Memory:**
     *   Applied vector search technology (ChromaDB) to solve a specific functional problem (error recurrence). Learned how to structure data (embeddings) to enable semantic retrieval, effectively giving the AI "experience" that persists across sessions.
+
+*   **Advanced Docker Patterns (Docker-in-Docker):**
+    *   Solved the complex deployment challenge of running a containerized agent that needs to spawn its own sibling containers. Implemented a Docker-in-Docker (DinD) architecture by mounting the host's Docker socket, enabling the agent to maintain its secure sandbox capabilities even when deployed as a container itself.
+
+*   **Cost-Effective LLM Integration:**
+    *   Optimized the system for real-world viability by integrating OpenRouter to leverage cost-effective models (`xiaomi/mimo-v2-flash:free`). This demonstrated an understanding of the trade-offs between model capability and operational cost, a critical skill for building sustainable AI applications.
