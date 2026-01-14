@@ -1,0 +1,8 @@
+langchain
+langchain-openai
+langchain-anthropic
+langgraph
+chromadb
+typer
+python-dotenv
+docker

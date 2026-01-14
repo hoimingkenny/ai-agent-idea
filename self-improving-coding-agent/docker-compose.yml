@@ -1,0 +1,17 @@
+services:
+  agent:
+    build: .
+    volumes:
+      # Mount the Docker socket to allow the agent to spawn sibling containers (Sandbox)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persist the vector database
+      - ./chroma_db:/app/chroma_db
+      # Persist the model cache (HuggingFace/Chroma) to avoid re-downloading
+      - model_cache:/root/.cache
+    env_file:
+      - .env
+    # Keep the container alive if needed, or just run one-off commands.
+    # Since the entrypoint is main.py, `docker-compose run agent "task"` is the way to go.
+
+volumes:
+  model_cache:
