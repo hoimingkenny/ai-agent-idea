@@ -21,8 +21,10 @@
 | **Orchestration** | **LangGraph** | We need a cyclic, stateful control flow to handle the "Plan → Validate → Execute → Feedback" loop. LangGraph allows us to model the editing process as a graph where the agent can loop back to refine its edit list based on validation errors or user feedback. |
 | **Vision Model** | **CLIP (OpenAI) / SigLIP (Google)** | For fast semantic search and scene understanding (e.g., matching "cinematic" to visual embeddings). These models are efficient enough to run locally or via API for frame indexing. |
 | **Audio Model** | **Whisper (OpenAI) + CLAP** | Whisper provides precise timestamped transcription for dialogue editing. CLAP (Contrastive Language-Audio Pretraining) allows us to classify audio events (music, ambient noise) to align cuts with audio cues. |
+| **LLM (Planning)**| **OpenRouter API** | Uses **xiaomi/mimo-v2-flash:free** via OpenRouter for the complex "Edit Planner" and "Validator" nodes, translating vague user intent into precise timeline operations. |
 | **Vector Database** | **ChromaDB** | A local-first vector store to index video frames and audio segments. This enables the agent to query "Where are the happy moments?" by searching embeddings. |
 | **Communication** | **ZeroMQ (ZMQ)** | High-performance asynchronous messaging to bridge the C++ (Qt) UI of Shotcut and the Python AI sidecar process. It decouples the heavy AI inference from the UI rendering thread. |
+| **Deployment** | **Docker** | Encapsulates the Python AI Agent layer, ensuring all dependencies (PyTorch, ffmpeg, etc.) are correctly installed and isolated from the host system. |
 
 ### Architecture Diagram
 
@@ -38,7 +40,7 @@ graph TD
         Bridge[IPC Messaging Layer]
     end
 
-    subgraph "AI Agent Layer (Python)"
+    subgraph "AI Agent Layer (Dockerized Python)"
         Bridge -->|Request| Controller[LangGraph Controller]
         
         subgraph "Perception Engine"
@@ -50,7 +52,9 @@ graph TD
         
         subgraph "Reasoning Engine"
             Controller --> Planner[Edit Planner LLM]
+            Planner -.->|API Call| OpenRouter[OpenRouter API]
             Planner -->|Draft EDL| Validator[Narrative Validator]
+            Validator -.->|API Call| OpenRouter
             Validator -->|Approved EDL| Executor[Command Translator]
         end
         
@@ -166,6 +170,20 @@ class SceneNode(BaseModel):
     *   Build the Chat UI in Qt/QML that sits inside Shotcut.
     *   Implement "Why did you do that?" logic: Store the LLM's reasoning chain in a sidecar JSON linked to the Edit ID.
     *   Implement Incremental Preview: Render only the modified segments (±2 seconds handle) for quick review.
+
+### Phase 5: Containerization
+**Goal:** Deploy the Python Agent Layer as a robust, isolated service.
+**File Structure:**
+```
+root/
+  ├── Dockerfile
+  ├── docker-compose.yml
+  ├── .env
+```
+**Key Tasks:**
+1.  **Dockerize Agent**: Create a container for the Python logic (PyTorch, CLIP, Whisper, LangGraph).
+2.  **Environment Setup**: Store the OpenRouter API key (`sk-or-v1-...`) in `.env`.
+3.  **Networking**: Configure `docker-compose` to expose the ZeroMQ ports to the host (so the Shotcut UI can connect).
 
 ---
 

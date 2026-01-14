@@ -11,10 +11,12 @@
 |-----------|------------|-----------|
 | **Framework** | **React Native** (Expo) | Cross-platform (iOS/Android), huge ecosystem, and easy integration with native modules via JSI. |
 | **Language** | **TypeScript** | Type safety is critical for complex state management and data schemas. |
-| **AI Engine** | **llama.rn** (llama.cpp bindings) | The industry standard for running GGUF models on edge. Natively supports 4-bit/8-bit quantization and CPU/GPU offloading. |
+| **AI Engine (Offline)** | **llama.rn** (llama.cpp bindings) | The industry standard for running GGUF models on edge. Natively supports 4-bit/8-bit quantization and CPU/GPU offloading. |
+| **AI Engine (Online)** | **OpenRouter API** | Provides access to high-performance models (specifically **xiaomi/mimo-v2-flash:free**) when network is available and privacy/latency trade-off is acceptable. |
 | **Local DB** | **WatermelonDB** | Built for offline-first apps. High performance (lazy loading) and built-in sync primitives. |
 | **State Mgmt** | **Zustand** | Lightweight, supports transient updates (vital for streaming tokens without re-rendering the whole tree). |
 | **Storage** | **MMKV** | Fast, synchronous storage for user preferences and model configuration (not chat history). |
+| **Infrastructure** | **Docker** | Containerized environment for the Sync Server and backend services to ensure consistent deployment. |
 
 ### Architecture Diagram
 
@@ -40,6 +42,7 @@ graph TD
     subgraph AI_Engine
         ModelLoader[Model Loader\n(Lazy/Unload)]
         Inference[Inference Engine\n(llama.rn)]
+        CloudAPI[OpenRouter API\n(Online Fallback)]
     end
 
     ChatInterface --> Orchestrator
@@ -49,11 +52,13 @@ graph TD
     
     Orchestrator --> ModelLoader
     ModelLoader --> Inference
+    ModelLoader --> CloudAPI
     
     BatteryMgr -.->|Throttle/Defer| Inference
     MemoryMgr -.->|Trigger Unload| ModelLoader
     
     Inference -->|Stream Tokens| ChatInterface
+    CloudAPI -->|Stream Tokens| ChatInterface
 ```
 
 ### Data Schemas
@@ -184,6 +189,22 @@ src/
 1.  **Encryption**: Integrate SQLCipher or an encrypted storage adapter for WatermelonDB.
 2.  **Sync Logic**: Implement a basic sync loop that checks for network connectivity (`NetInfo`) before attempting to push changes to a mock backend or user-defined endpoint.
 3.  **UI Refinement**: Add loading states, error handling for "Out of Memory" crashes, and markdown rendering for bot responses.
+
+### Phase 5: Hybrid Cloud & Deployment
+**Goal:** Add online capabilities and containerize the backend infrastructure.
+**File Structure:**
+```
+root/
+  ├── Dockerfile
+  ├── docker-compose.yml
+  ├── .env
+  └── server/
+      └── sync_server.js
+```
+**Key Tasks:**
+1.  **OpenRouter Integration**: Add `OpenRouterService` to handle API requests when the user opts for "Cloud Mode" or when the local model is insufficient.
+2.  **Environment Configuration**: Create `.env` to securely store the OpenRouter API Key (`sk-or-v1-...`).
+3.  **Dockerization**: Create `Dockerfile` and `docker-compose.yml` to deploy the Sync Server and potentially a web-based companion app.
 
 ---
 

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  sync-server:
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev # or node server/sync_server.js

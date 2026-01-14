@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  video-agent:
+    build: .
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "5555:5555" # ZeroMQ Request/Reply
+      - "5556:5556" # ZeroMQ Pub/Sub
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all # For GPU support if available
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

@@ -21,10 +21,12 @@ The **Personal Life OS Agent** is a sophisticated, privacy-first AI system desig
 | **Language** | **Python 3.12+** | The standard for AI engineering; robust typing system for complex data modeling. |
 | **Orchestration** | **LangGraph** | Essential for the **cyclic state management** required by the "proactive monitoring" loops and multi-step reasoning (Plan → Critique → Act). Standard linear chains cannot handle the "background thread" logic effectively. |
 | **Local Inference** | **Ollama** (Llama 3 / Mistral) | Critical for the **Privacy Architecture**. Allows running powerful models entirely offline/locally, ensuring no sensitive PII is sent to cloud APIs. |
+| **Cloud Inference** | **OpenRouter API** | Optional high-intelligence fallback for complex planning tasks where local models struggle. Selected Model: **xiaomi/mimo-v2-flash:free**. |
 | **Vector Store** | **ChromaDB** (Local Persistence) | Lightweight, open-source vector database for **Memory Consolidation** and semantic retrieval of past events. |
 | **Relational DB** | **SQLite + SQLCipher** | secure, encrypted-at-rest storage for structured data (financial transactions, health metrics). Zero-config serverless architecture fits the "Personal OS" model. |
 | **Knowledge Graph** | **NetworkX** + **JSON Storage** | For mapping **Entities** (People, Places) and their relationships. Simpler than Neo4j for a single-user system but powerful enough for graph algorithms (centrality, pathfinding). |
 | **Scheduling** | **APScheduler** | Robust in-process task scheduler to handle the **Proactive Monitoring** background threads (running every 6 hours) without needing a heavy message queue like Redis/Celery. |
+| **Deployment** | **Docker** | Containerized deployment to ensure reproducibility and easy installation across different environments. |
 
 ### Architecture Diagram
 
@@ -50,6 +52,8 @@ graph TD
         Monitor[Background Monitor]
         Critic[Value Alignment Critic]
         Summarizer[Nightly Summarizer]
+        LLM_Local[Ollama Local]
+        LLM_Cloud[OpenRouter Cloud]
     end
 
     User((User)) <--> UI[CLI / Web Dashboard]
@@ -66,6 +70,8 @@ graph TD
     UI -->|Query| Router
     Router -->|Fetch Context| KG & Vec & SQL
     Router --> Planner
+    Planner -.->|Complex Task| LLM_Cloud
+    Planner -.->|Privacy Task| LLM_Local
     Planner --> Critic
     Critic -->|Approved| UI
     Critic -->|Conflict| Planner
@@ -179,6 +185,20 @@ class AgentState(BaseModel):
         *   Current "Risk Level" (from Monitor).
     2.  Implement `consolidate_memories()`: Query events > 24h old, summarize, store summary, archive raw events.
     3.  Add "Why?" feature: Append the `reasoning_trace` from `AgentState` to the final response.
+
+### Phase 5: Deployment & Scale
+**Goal:** Containerize the application for reliable deployment.
+**File Structure:**
+```
+root/
+  ├── Dockerfile
+  ├── docker-compose.yml
+  ├── .env
+```
+**Key Tasks:**
+1.  **Docker Setup**: Create a `Dockerfile` for the Python environment (LangGraph, ChromaDB, etc.).
+2.  **Environment Config**: Use `.env` to manage secrets, including the OpenRouter API key (`sk-or-v1-...`).
+3.  **Orchestration**: Use `docker-compose` to manage the service and potentially a separate container for ChromaDB if scaling up.
 
 ---
 
