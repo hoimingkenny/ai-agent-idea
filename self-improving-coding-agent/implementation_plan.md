@@ -26,7 +26,7 @@ graph TD
     Code --> SafetyCheck{Static Analysis}
     
     SafetyCheck -- Fail --> Reflect[Reflector Node]
-    SafetyCheck -- Pass --> Execute[Executor Node (Docker)]
+    SafetyCheck -- Pass --> Execute[Executor Node Docker]
     
     Execute -- Error --> Reflect
     Execute -- Success --> Verify{Verification}
