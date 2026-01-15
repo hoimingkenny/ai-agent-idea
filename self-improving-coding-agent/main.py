@@ -33,7 +33,8 @@ def run(task: str, max_iterations: int = 10):
         "current_code": "",
         "history": [],
         "status": "planning",
-        "retrieved_context": ""
+        "retrieved_context": "",
+        "research_logs": []
     }
     
     try:
@@ -71,6 +72,15 @@ def run(task: str, max_iterations: int = 10):
                         print(f"🧠 Retrieved Memory: Found past lessons.")
                     else:
                         print(f"🧠 Retrieved Memory: No relevant past lessons found.")
+                
+                elif node_name == "researcher":
+                    logs = state_update.get("research_logs", [])
+                    if logs:
+                        print(f"🔍 Research Completed: Found {len(logs)} notes.")
+                        for log in logs:
+                            print(f"  - {log[:100]}...")
+                    else:
+                        print(f"🔍 Research Skipped: No search needed.")
 
     except Exception as e:
         print(f"\n💥 Error running agent: {e}")

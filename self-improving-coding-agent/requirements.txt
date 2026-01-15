@@ -6,3 +6,7 @@ chromadb
 typer
 python-dotenv
 docker
+ddgs
+fastapi
+uvicorn
+pytest

@@ -57,6 +57,14 @@ Run the agent with a task description:
 python main.py "Write a python script to calculate the 10th Fibonacci number"
 ```
 
+### API Usage
+
+Run the HTTP API:
+
+```bash
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+```
+
 ### Docker Usage
 
 You can also run the agent entirely within Docker. This is useful for deployment or ensuring a consistent environment.
@@ -76,8 +84,16 @@ You can also run the agent entirely within Docker. This is useful for deployment
 ## How it Works
 
 The agent will:
-1.  **Plan** the implementation.
-2.  **Code** the solution.
-3.  **Execute** the code in a sandbox (or locally if Docker is missing).
-4.  **Reflect** on any errors and fix them automatically.
-5.  **Save** successful patterns to memory for future tasks.
+1.  **Retrieve** past lessons from memory.
+2.  **Research** the web for documentation and solutions (if needed).
+3.  **Plan** the implementation.
+4.  **Code** the solution.
+5.  **Execute** the code in a sandbox (or locally if Docker is missing).
+6.  **Reflect** on any errors and fix them automatically.
+7.  **Save** successful patterns to memory for future tasks.
+
+## Tests
+
+```bash
+pytest
+```

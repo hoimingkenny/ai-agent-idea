@@ -18,8 +18,9 @@ class AgentState(BaseModel):
     iteration: int = 0
     max_iterations: int = 5
     retrieved_context: str = ""
+    research_logs: List[str] = Field(default_factory=list)
     # history: Annotated[List[TaskMemory], operator.add] # If we want to append. 
     # But standard Pydantic usage in LangGraph replaces state unless Annotated is used.
     # For now, let's just use List and manually append in nodes.
     history: List[TaskMemory] = Field(default_factory=list)
-    status: Literal["planning", "coding", "executing", "reflecting", "finished", "failed"] = "planning"
+    status: Literal["planning", "researching", "coding", "executing", "reflecting", "finished", "failed"] = "planning"
